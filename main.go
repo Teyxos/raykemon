@@ -11,32 +11,25 @@ func main() {
 	screenHeight := int32(450)
 
 	rl.InitWindow(screenWidth, screenHeight, "Raykemon Tests") // Initialize window
-	defer rl.CloseAudioDevice()                                // Close audio device
+	defer rl.CloseWindow()                                     // Close window
 
-	rl.InitAudioDevice()   // Initialize audio device
-	defer rl.CloseWindow() // Close window
+	rl.InitAudioDevice()        // Initialize audio device
+	defer rl.CloseAudioDevice() // Close audio device
 
-	// logic to load tiled maps (not working yet)
-	// gameMap, err := tiled.LoadFile("map/map.tmx")
-	// if err != nil {
-	// 	fmt.Printf("error parsing map: %s", err.Error())
-	// 	os.Exit(2)
-	// }
+	LoadAudio()         // Load audio files
+	defer UnloadAudio() // Unload audio files
 
-	// err = lib.ParseTiledMap(*gameMap)
+	lib.SetBackgroundMusic(Audios[0]) // Set background music
 
-	// if err != nil {
-	// 	fmt.Printf("error parsing map: %s", err.Error())
-	// 	os.Exit(2)
-	// }
-
-	LoadAudio()
-	defer UnloadAudio()
-	LoadTextures()
+	LoadTextures()         // Load textures
+	defer UnloadTextures() // Unload textures
 
 	rl.SetTargetFPS(60)
 
 	lib.SetScreen(lib.WorldScreen)
+
+	// Create a moveable object
+	moveable := lib.Moveable{X: 100, Y: 100, Width: 50, Height: 50, Speed: 5}
 
 	for !rl.WindowShouldClose() {
 		currentScreen := lib.GetScreen()
@@ -48,22 +41,36 @@ func main() {
 
 		// Logic to draw the current screen
 		if currentScreen == lib.WorldScreen {
+
+			if rl.IsKeyDown(rl.KeyUp) {
+				moveable.MoveUp()
+			}
+			if rl.IsKeyDown(rl.KeyDown) {
+				moveable.MoveDown()
+			}
+			if rl.IsKeyDown(rl.KeyLeft) {
+				moveable.MoveLeft()
+			}
+			if rl.IsKeyDown(rl.KeyRight) {
+				moveable.MoveRight()
+			}
+
 			screens.DrawWorldScreen()
+
+			moveable.DrawSelf()
+
 		} else if currentScreen == lib.BattleScreen {
 			screens.DrawBattleScreen()
 		} else if currentScreen == lib.MenuScreen {
 			screens.DrawMenuScreen()
 		}
 
-		if rl.IsKeyPressed(rl.KeyF1) {
+		switch rl.GetKeyPressed() {
+		case rl.KeyF1:
 			lib.SetScreen(lib.WorldScreen)
-		}
-
-		if rl.IsKeyPressed(rl.KeyF2) {
+		case rl.KeyF2:
 			lib.SetScreen(lib.BattleScreen)
-		}
-
-		if rl.IsKeyPressed(rl.KeyF3) {
+		case rl.KeyF3:
 			lib.SetScreen(lib.MenuScreen)
 		}
 
