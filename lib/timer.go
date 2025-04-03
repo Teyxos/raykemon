@@ -16,7 +16,7 @@ func StartTimer(lifeTime float64) *Timer {
 	return &timer
 }
 
-func (timer Timer) TimerDone() bool {
+func (timer Timer) IsTimerDone() bool {
 	return rl.GetTime()-timer.startTime >= timer.lifeTime
 }
 
