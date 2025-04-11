@@ -10,10 +10,17 @@ import (
 )
 
 var supportedAudioFormats = []string{".mp3", ".wav", ".ogg", ".flac"}
-var directory = "/home/teyxos/Documents/raykemon/assets/audio/"
+var sndDirectory = "./assets/audio/"
 
+// ! There is an error when there is no audio file in the directory
 func getAudioFromFile(c chan string, files []os.DirEntry) {
 	// Load audio files from the assets folder
+
+	if len(files) == 0 {
+		log.Println("No audio files found in the directory.")
+		close(c)
+		return
+	}
 
 	for _, file := range files {
 		if file.IsDir() {
@@ -21,18 +28,20 @@ func getAudioFromFile(c chan string, files []os.DirEntry) {
 		}
 
 		if slices.Contains(supportedAudioFormats, filepath.Ext(file.Name())) {
-			filePath := filepath.Join(directory, file.Name())
+			filePath := filepath.Join(sndDirectory, file.Name())
 			c <- filePath
 		}
 	}
+
+	close(c)
 }
 
-var Audios = []rl.Music{}
+var Audios = map[string]rl.Music{}
 
 func LoadAudio() {
 	c := make(chan string)
 
-	files, err := os.ReadDir(directory)
+	files, err := os.ReadDir(sndDirectory)
 	log.Println(files)
 
 	if err != nil {
@@ -42,10 +51,10 @@ func LoadAudio() {
 
 	// Wait for the audio file to be sent through the channel
 
-	for i := 0; i < len(files); i++ {
-		filePath := <-c
-		Audios = append(Audios, rl.LoadMusicStream(filePath))
+	for filePath := range c {
+		Audios[filePath] = rl.LoadMusicStream(filePath)
 	}
+
 }
 
 func UnloadAudio() {

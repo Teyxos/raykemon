@@ -1,16 +1,19 @@
 package main
 
 import (
+	"log"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"github.com/teyxos/raykemon/lib"
 	"github.com/teyxos/raykemon/screens"
 )
 
-func main() {
-	screenWidth := int32(800)
-	screenHeight := int32(450)
+var ScreenWidth = int32(800)
+var ScreenHeight = int32(450)
 
-	rl.InitWindow(screenWidth, screenHeight, "Raykemon Tests") // Initialize window
+func main() {
+
+	rl.InitWindow(ScreenWidth, ScreenHeight, "Raykemon Tests") // Initialize window
 	defer rl.CloseWindow()                                     // Close window
 
 	rl.InitAudioDevice()        // Initialize audio device
@@ -19,7 +22,17 @@ func main() {
 	LoadAudio()         // Load audio files
 	defer UnloadAudio() // Unload audio files
 
-	lib.SetBackgroundMusic(Audios[0]) // Set background music
+	if len(Audios) == 0 {
+		rl.TraceLog(rl.LogWarning, "No audio files found in the directory.")
+	} else {
+		lib.SetBackgroundMusic(Audios["assets/audio/country.mp3"]) // Set background music
+	}
+
+	if len(Textures) == 0 {
+		rl.TraceLog(rl.LogWarning, "No texture files found in the directory.")
+	} else {
+
+	}
 
 	LoadTextures()         // Load textures
 	defer UnloadTextures() // Unload textures
@@ -29,7 +42,8 @@ func main() {
 	lib.SetScreen(lib.WorldScreen)
 
 	// Create a moveable object
-	moveable := lib.Moveable{X: 100, Y: 100, Width: 50, Height: 50, Speed: 5}
+	moveable := lib.MoveableFromTexture(100, 100, 5, Textures["assets/textures/character.png"])
+	log.Println(moveable)
 
 	for !rl.WindowShouldClose() {
 		currentScreen := lib.GetScreen()
@@ -72,6 +86,8 @@ func main() {
 			lib.SetScreen(lib.BattleScreen)
 		case rl.KeyF3:
 			lib.SetScreen(lib.MenuScreen)
+		case rl.KeyF11:
+			rl.ToggleFullscreen()
 		}
 
 		rl.ClearBackground(rl.Black)
