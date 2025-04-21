@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"github.com/teyxos/raykemon/lib"
 	"github.com/teyxos/raykemon/screens"
@@ -11,8 +9,9 @@ import (
 var ScreenWidth = int32(800)
 var ScreenHeight = int32(450)
 
-func main() {
+// TODO: Add functionallity to use textures as spritesheets and be able to change between them
 
+func main() {
 	rl.InitWindow(ScreenWidth, ScreenHeight, "Raykemon Tests") // Initialize window
 	defer rl.CloseWindow()                                     // Close window
 
@@ -30,8 +29,6 @@ func main() {
 
 	if len(Textures) == 0 {
 		rl.TraceLog(rl.LogWarning, "No texture files found in the directory.")
-	} else {
-
 	}
 
 	LoadTextures()         // Load textures
@@ -42,10 +39,10 @@ func main() {
 	lib.SetScreen(lib.WorldScreen)
 
 	// Create a moveable object
-	moveable := lib.MoveableFromTexture(100, 100, 5, Textures["assets/textures/character.png"])
-	log.Println(moveable)
+	moveable := lib.MoveableFromTexture(100, 100, 2.5, Textures["assets/textures/character.png"])
 
 	for !rl.WindowShouldClose() {
+		dt := rl.GetFrameTime() * 100 // Get delta time to make it 100px per second
 		currentScreen := lib.GetScreen()
 		currentMusic := lib.GetMusic()
 
@@ -57,16 +54,16 @@ func main() {
 		if currentScreen == lib.WorldScreen {
 
 			if rl.IsKeyDown(rl.KeyUp) {
-				moveable.MoveUp()
+				moveable.MoveUp(dt)
 			}
 			if rl.IsKeyDown(rl.KeyDown) {
-				moveable.MoveDown()
+				moveable.MoveDown(dt)
 			}
 			if rl.IsKeyDown(rl.KeyLeft) {
-				moveable.MoveLeft()
+				moveable.MoveLeft(dt)
 			}
 			if rl.IsKeyDown(rl.KeyRight) {
-				moveable.MoveRight()
+				moveable.MoveRight(dt)
 			}
 
 			screens.DrawWorldScreen()

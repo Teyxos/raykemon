@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"slices"
@@ -12,12 +11,11 @@ import (
 var supportedTextureFormats = []string{".png", ".jpg", ".bmp", ".tga"}
 var txtDirectory = "./assets/textures/"
 
-// ! There is an error when there is no textures file in the directory. It only happpens when either there are no files of textures or audio (all threads are offline)
 func getTexturefromFile(c chan string, files []os.DirEntry) {
 	// Load textures files from the assets folder
 
 	if len(files) == 0 {
-		log.Println("No audio files found in the directory.")
+		rl.TraceLog(rl.LogError, "No texture files found in the directory.")
 		close(c)
 		return
 	}
@@ -42,16 +40,18 @@ func LoadTextures() {
 	c := make(chan string)
 
 	files, err := os.ReadDir(txtDirectory)
-	log.Println(files)
+	rl.TraceLog(rl.LogInfo, "Reading directory: %s", txtDirectory)
 
 	if err != nil {
-		log.Fatal(err)
+		rl.TraceLog(rl.LogError, "Failed to read directory: %v", err)
+		return
 	}
 	go getTexturefromFile(c, files)
 
 	// Wait for the audio file to be sent through the channel
 
 	for filePath := range c {
+		// While the key right now is the file name, its gonna be user defined
 		Textures[filePath] = rl.LoadTexture(filePath)
 	}
 }

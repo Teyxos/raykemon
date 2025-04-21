@@ -29,41 +29,41 @@ func MoveableFromTexture(x float32, y float32, speed float32, texture rl.Texture
 }
 
 // Moves the object up
-func (m *Moveable) MoveUp() {
+func (m *Moveable) MoveUp(dt float32) {
 	// Return if the object is already at the top of the screen
 	if m.Y-m.Speed < 0 {
 		return
 	}
 
-	m.Y -= m.Speed
+	m.Y -= m.Speed * dt
 }
 
 // Moves the object down
-func (m *Moveable) MoveDown() {
+func (m *Moveable) MoveDown(dt float32) {
 	// Return if the object is already at the bottom of the screen
 	if m.Y+m.Height+m.Speed > float32(rl.GetScreenHeight()) {
 		return
 	}
 
-	m.Y += m.Speed
+	m.Y += m.Speed * dt
 }
 
 // Moves the object left
-func (m *Moveable) MoveLeft() {
+func (m *Moveable) MoveLeft(dt float32) {
 	// Return if the object is already at the left of the screen
 	if m.X-m.Speed < 0 {
 		return
 	}
-	m.X -= m.Speed
+	m.X -= m.Speed * dt
 }
 
 // Moves the object right
-func (m *Moveable) MoveRight() {
+func (m *Moveable) MoveRight(dt float32) {
 	// Return if the object is already at the right of the screen
 	if m.X+m.Width+m.Speed > float32(rl.GetScreenWidth()) {
 		return
 	}
-	m.X += m.Speed
+	m.X += m.Speed * dt
 }
 
 // DrawSelf draws the moveable object on the screen
@@ -74,7 +74,8 @@ func (m *Moveable) MoveRight() {
 func (m *Moveable) DrawSelf() {
 	// Check if the moveable has a sprite
 	if reflect.TypeOf(m.Sprite) == reflect.TypeOf(rl.Texture2D{}) {
-		rl.DrawTexture(m.Sprite, int32(m.X), int32(m.Y), rl.White)
+		// TODO: Pass to the right each frame to make animations
+		rl.DrawTexturePro(m.Sprite, rl.Rectangle{X: 0 + (24 * 0) /* per frame */, Y: 24, Width: 24, Height: 24}, rl.Rectangle{X: m.X, Y: m.Y, Width: m.Width, Height: m.Height}, rl.Vector2{}, 0, rl.White)
 	} else {
 		rl.DrawRectangle(int32(m.X), int32(m.Y), int32(m.Width), int32(m.Height), rl.Red)
 		rl.DrawRectangleLines(int32(m.X), int32(m.Y), int32(m.Width), int32(m.Height), rl.Black)

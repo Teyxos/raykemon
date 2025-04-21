@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"slices"
@@ -12,12 +11,11 @@ import (
 var supportedAudioFormats = []string{".mp3", ".wav", ".ogg", ".flac"}
 var sndDirectory = "./assets/audio/"
 
-// ! There is an error when there is no audio file in the directory
 func getAudioFromFile(c chan string, files []os.DirEntry) {
 	// Load audio files from the assets folder
 
 	if len(files) == 0 {
-		log.Println("No audio files found in the directory.")
+		rl.TraceLog(rl.LogError, "No audio files found in the directory.")
 		close(c)
 		return
 	}
@@ -42,10 +40,10 @@ func LoadAudio() {
 	c := make(chan string)
 
 	files, err := os.ReadDir(sndDirectory)
-	log.Println(files)
+	rl.TraceLog(rl.LogInfo, "Reading directory: %s", sndDirectory)
 
 	if err != nil {
-		log.Fatal(err)
+		rl.TraceLog(rl.LogError, "Failed to read directory: %v", err)
 	}
 	go getAudioFromFile(c, files)
 
