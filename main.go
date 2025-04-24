@@ -34,15 +34,17 @@ func main() {
 	LoadTextures()         // Load textures
 	defer UnloadTextures() // Unload textures
 
+	var monitor = rl.GetCurrentMonitor()
+
 	rl.SetTargetFPS(60)
 
 	lib.SetScreen(lib.WorldScreen)
 
 	// Create a moveable object
-	moveable := lib.MoveableFromTexture(100, 100, 2.5, Textures["assets/textures/character.png"])
+	moveable := lib.MoveableFromTexture(100, 100, 2.5, Textures["assets/textures/character.png"], 3)
 
 	for !rl.WindowShouldClose() {
-		dt := rl.GetFrameTime() * 100 // Get delta time to make it 100px per second
+		dt := rl.GetFrameTime() * 100 // Get delta time to make it be 1 speed = 100px per second
 		currentScreen := lib.GetScreen()
 		currentMusic := lib.GetMusic()
 
@@ -55,20 +57,24 @@ func main() {
 
 			if rl.IsKeyDown(rl.KeyUp) {
 				moveable.MoveUp(dt)
+				moveable.Direction = lib.DirectionUp
 			}
 			if rl.IsKeyDown(rl.KeyDown) {
 				moveable.MoveDown(dt)
+				moveable.Direction = lib.DirectionDown
 			}
 			if rl.IsKeyDown(rl.KeyLeft) {
 				moveable.MoveLeft(dt)
+				moveable.Direction = lib.DirectionLeft
 			}
 			if rl.IsKeyDown(rl.KeyRight) {
 				moveable.MoveRight(dt)
+				moveable.Direction = lib.DirectionRight
 			}
 
 			screens.DrawWorldScreen()
 
-			moveable.DrawSelf()
+			moveable.DrawSelf(7)
 
 		} else if currentScreen == lib.BattleScreen {
 			screens.DrawBattleScreen()
@@ -84,6 +90,14 @@ func main() {
 		case rl.KeyF3:
 			lib.SetScreen(lib.MenuScreen)
 		case rl.KeyF11:
+			// Test if this works on not wayland compositors
+			if rl.IsWindowFullscreen() {
+				rl.SetWindowSize(int(ScreenWidth), int(ScreenHeight))
+			} else {
+				width := rl.GetMonitorPhysicalWidth(monitor)
+				height := rl.GetMonitorPhysicalHeight(monitor)
+				rl.SetWindowSize(width, height)
+			}
 			rl.ToggleFullscreen()
 		}
 
