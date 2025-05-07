@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"github.com/teyxos/raykemon/lib"
 	"github.com/teyxos/raykemon/screens"
@@ -9,7 +11,7 @@ import (
 var ScreenWidth = int32(800)
 var ScreenHeight = int32(450)
 
-// TODO: Add functionallity to use textures as spritesheets and be able to change between them
+// TODO: Add functionallity to change the animation depeding on the direction without the need for user input just go to the row the specify when creating a texture
 
 func main() {
 	rl.InitWindow(ScreenWidth, ScreenHeight, "Raykemon Tests") // Initialize window
@@ -23,8 +25,6 @@ func main() {
 
 	if len(Audios) == 0 {
 		rl.TraceLog(rl.LogWarning, "No audio files found in the directory.")
-	} else {
-		lib.SetBackgroundMusic(Audios["assets/audio/country.mp3"]) // Set background music
 	}
 
 	if len(Textures) == 0 {
@@ -36,12 +36,46 @@ func main() {
 
 	var monitor = rl.GetCurrentMonitor()
 
-	rl.SetTargetFPS(60)
+	rl.SetTargetFPS(60) // This will be a settings option later
+	rl.SetExitKey(0)    // So user doesnt accidently close the window
 
 	lib.SetScreen(lib.WorldScreen)
 
+	moveables := make(map[string]*lib.Moveable)
+
+	parser, err := lib.NewLineParser("assets/resources/example.txt")
+	if err != nil {
+		rl.TraceLog(rl.LogError, "Failed to create line parser: %v", err)
+		return
+	}
+	defer parser.Close()
+	// Read lines from the file
+	for line, ok := parser.Next(); ok; line, ok = parser.Next() {
+		words := parser.SplitLine(line)
+		var action lib.ParserAction
+
+		for _, word := range words {
+			if word == "Player" {
+				action = lib.PlayerAction
+				continue
+			}
+
+			if word == "BGMusic" {
+				action = lib.BGMusicAction
+				continue
+			}
+
+			if action == lib.PlayerAction {
+				moveables["player"] = lib.MoveableFromTexture(100, 100, 2.5, Textures[strings.Join([]string{"assets/textures/", word}, "")], 3)
+			}
+
+			if action == lib.BGMusicAction {
+				lib.SetBackgroundMusic(Audios[strings.Join([]string{"assets/audio/", word}, "")])
+			}
+		}
+	}
+
 	// Create a moveable object
-	moveable := lib.MoveableFromTexture(100, 100, 2.5, Textures["assets/textures/character.png"], 3)
 
 	for !rl.WindowShouldClose() {
 		dt := rl.GetFrameTime() * 100 // Get delta time to make it be 1 speed = 100px per second
@@ -56,25 +90,25 @@ func main() {
 		if currentScreen == lib.WorldScreen {
 
 			if rl.IsKeyDown(rl.KeyUp) {
-				moveable.MoveUp(dt)
-				moveable.Direction = lib.DirectionUp
+				moveables["player"].MoveUp(dt)
+				moveables["player"].Direction = lib.DirectionUp
 			}
 			if rl.IsKeyDown(rl.KeyDown) {
-				moveable.MoveDown(dt)
-				moveable.Direction = lib.DirectionDown
+				moveables["player"].MoveDown(dt)
+				moveables["player"].Direction = lib.DirectionDown
 			}
 			if rl.IsKeyDown(rl.KeyLeft) {
-				moveable.MoveLeft(dt)
-				moveable.Direction = lib.DirectionLeft
+				moveables["player"].MoveLeft(dt)
+				moveables["player"].Direction = lib.DirectionLeft
 			}
 			if rl.IsKeyDown(rl.KeyRight) {
-				moveable.MoveRight(dt)
-				moveable.Direction = lib.DirectionRight
+				moveables["player"].MoveRight(dt)
+				moveables["player"].Direction = lib.DirectionRight
 			}
 
 			screens.DrawWorldScreen()
 
-			moveable.DrawSelf(7)
+			moveables["player"].DrawSelf(7)
 
 		} else if currentScreen == lib.BattleScreen {
 			screens.DrawBattleScreen()

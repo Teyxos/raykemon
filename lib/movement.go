@@ -25,8 +25,8 @@ const (
 
 // MoveableFromTexture creates a new Moveable object from a texture
 // It sets the width and height of the Moveable object to the width and height of the texture
-func MoveableFromTexture(x float32, y float32, speed float32, texture rl.Texture2D, frames int32) Moveable {
-	return Moveable{
+func MoveableFromTexture(x float32, y float32, speed float32, texture rl.Texture2D, frames int32) *Moveable {
+	return &Moveable{
 		X:           x,
 		Y:           y,
 		Width:       texture.Width,
