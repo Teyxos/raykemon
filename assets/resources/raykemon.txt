@@ -1,0 +1,2 @@
+Player character.png 3
+BGMusic country.mp3

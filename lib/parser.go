@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strings"
 )
 
 type ParserAction int
@@ -54,8 +53,4 @@ func (p *LineParser) Next() (string, bool) {
 // Close closes the file
 func (p *LineParser) Close() error {
 	return p.file.Close()
-}
-
-func (p *LineParser) SplitLine(line string) []string {
-	return strings.Fields(line) // This handles multiple spaces, tabs, etc.
 }

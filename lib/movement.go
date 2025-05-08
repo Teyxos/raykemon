@@ -80,13 +80,25 @@ func (m *Moveable) MoveRight(dt float32) {
 // Otherwise, it draws a rectangle with the moveable's width and height
 // The rectangle is filled with red color and has a black outline
 // The X and Y coordinates are used to position the rectangle on the screen
-func (m *Moveable) DrawSelf(firstFrame int32) {
+func (m *Moveable) DrawSelf() {
 	// Check if the moveable has a sprite
 	if m.SpriteSheet.Texture.ID > 0 {
 		// Draw the current frame of the sprite sheet
 
-		// TODO: Make so the direction changes using m.Direction to match the spritesheet, depeding on the rows
-		frame := m.SpriteSheet.GetFrame(int32(rl.GetTime()*10)%m.SpriteSheet.Frames + firstFrame - 1)
+		// TODO: Make so the direction changes using m.Direction to match the spritesheet, depeding on the row
+		var offset int32
+		switch m.Direction {
+		case DirectionUp:
+			offset = 0
+		case DirectionRight:
+			offset = 1 * m.SpriteSheet.Frames
+		case DirectionDown:
+			offset = 2 * m.SpriteSheet.Frames
+		case DirectionLeft:
+			offset = 3 * m.SpriteSheet.Frames
+		}
+
+		frame := m.SpriteSheet.GetFrame(int32(rl.GetTime()*10)%m.SpriteSheet.Frames + offset)
 		rl.DrawTexturePro(
 			m.SpriteSheet.Texture,
 			frame,

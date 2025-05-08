@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"strings"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -43,7 +44,7 @@ func main() {
 
 	moveables := make(map[string]*lib.Moveable)
 
-	parser, err := lib.NewLineParser("assets/resources/example.txt")
+	parser, err := lib.NewLineParser("assets/resources/raykemon.txt")
 	if err != nil {
 		rl.TraceLog(rl.LogError, "Failed to create line parser: %v", err)
 		return
@@ -51,27 +52,20 @@ func main() {
 	defer parser.Close()
 	// Read lines from the file
 	for line, ok := parser.Next(); ok; line, ok = parser.Next() {
-		words := parser.SplitLine(line)
-		var action lib.ParserAction
+		words := strings.Fields(line)
+		// var action lib.ParserAction
 
-		for _, word := range words {
-			if word == "Player" {
-				action = lib.PlayerAction
-				continue
+		switch words[0] {
+		case "Player":
+			frames, err := strconv.Atoi(words[2])
+			if err != nil {
+				rl.TraceLog(rl.LogError, "Failed to convert string to int: %v", err)
+				return
 			}
 
-			if word == "BGMusic" {
-				action = lib.BGMusicAction
-				continue
-			}
-
-			if action == lib.PlayerAction {
-				moveables["player"] = lib.MoveableFromTexture(100, 100, 2.5, Textures[strings.Join([]string{"assets/textures/", word}, "")], 3)
-			}
-
-			if action == lib.BGMusicAction {
-				lib.SetBackgroundMusic(Audios[strings.Join([]string{"assets/audio/", word}, "")])
-			}
+			moveables["player"] = lib.MoveableFromTexture(100, 100, 2.5, Textures[strings.Join([]string{"assets/textures/", words[1]}, "")], int32(frames))
+		case "BGMusic":
+			lib.SetBackgroundMusic(Audios[strings.Join([]string{"assets/audio/", words[1]}, "")])
 		}
 	}
 
@@ -108,7 +102,7 @@ func main() {
 
 			screens.DrawWorldScreen()
 
-			moveables["player"].DrawSelf(7)
+			moveables["player"].DrawSelf()
 
 		} else if currentScreen == lib.BattleScreen {
 			screens.DrawBattleScreen()
