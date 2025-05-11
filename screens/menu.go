@@ -9,16 +9,19 @@ import (
 
 var currentMenu = MainMenu
 var txArray []string
+var aArray []string
 
-func DrawMenuScreen(movs map[string]*lib.Moveable, tx map[string]rl.Texture2D) error {
+func DrawMenuScreen(movs map[string]*lib.Moveable, tx map[string]rl.Texture2D, a map[string]rl.Music) error {
 	rl.DrawRectangle(0, 0, int32(rl.GetScreenWidth()), int32(rl.GetScreenHeight()), rl.RayWhite)
 
 	currentSprite := movs["player"].SpriteSheet.Name
-	currentIndex := 0
+	// var currentMusic string
+	currentSIndex := 0
+	// currentAIndex := 0
 
 	for i := 0; i < len(txArray); i++ {
 		if strings.Contains(txArray[i], currentSprite) {
-			currentIndex = i
+			currentSIndex = i
 			break
 		}
 	}
@@ -26,6 +29,12 @@ func DrawMenuScreen(movs map[string]*lib.Moveable, tx map[string]rl.Texture2D) e
 	if len(txArray) == 0 {
 		for k := range tx {
 			txArray = append(txArray, k)
+		}
+	}
+
+	if len(aArray) == 0 {
+		for k := range a {
+			aArray = append(aArray, k)
 		}
 	}
 
@@ -42,30 +51,61 @@ func DrawMenuScreen(movs map[string]*lib.Moveable, tx map[string]rl.Texture2D) e
 				rl.DrawText(txArray[i], 10, 60+30*int32(i), 20, rl.Black)
 			}
 		}
+		// case MusicSelector:
+		// 	rl.DrawText("Press 'Enter' to save the new music", 10, 30, 20, rl.Black)
+		// 	rl.TraceLog(rl.LogInfo, "current index: %v", currentAIndex)
+		// 	for i := 0; i < len(aArray); i++ {
+		// 		if strings.Contains(aArray[i], currentMusic) {
+		// 			rl.DrawText("> "+aArray[i], 10, 60+30*int32(i), 20, rl.Black)
+		// 		} else {
+		// 			rl.DrawText(aArray[i], 10, 60+30*int32(i), 20, rl.Black)
+		// 		}
+		// 	}
 	}
 
 	switch rl.GetKeyPressed() {
 	case rl.KeyF1:
 		currentMenu = SpriteSelector
+	case rl.KeyF2:
+		currentMenu = MusicSelector
 	case rl.KeyM:
 		currentMenu = MainMenu
 	case rl.KeyEscape:
 		lib.SetScreen(lib.WorldScreen)
 	case rl.KeyW:
-		if currentIndex > 0 {
-			currentIndex--
+		if currentMenu == SpriteSelector {
+			if currentSIndex > 0 {
+				currentSIndex--
+			}
+			movs["player"].SpriteSheet.Name = txArray[currentSIndex]
 		}
-		movs["player"].SpriteSheet.Name = txArray[currentIndex]
+		// else if currentMenu == MusicSelector {
+		// 	if currentAIndex > 0 {
+		// 		currentAIndex--
+		// 		currentMusic = aArray[currentAIndex]
+		// 	}
+
 	case rl.KeyS:
-		if currentIndex < len(txArray)-1 {
-			currentIndex++
+		if currentMenu == SpriteSelector {
+			if currentSIndex < len(txArray)-1 {
+				currentSIndex++
+			}
+			movs["player"].SpriteSheet.Name = txArray[currentSIndex]
 		}
-		movs["player"].SpriteSheet.Name = txArray[currentIndex]
+		// else if currentMenu == MusicSelector {
+		// 	if currentAIndex < len(aArray)-1 {
+		// 		currentAIndex++
+		// 		currentMusic = aArray[currentAIndex]
+		// 	}
+
 	case rl.KeyEnter:
 		if currentMenu == SpriteSelector {
-			movs["player"].SpriteSheet = lib.NewSpriteSheet(tx[movs["player"].SpriteSheet.Name], lib.SpriteSheets[txArray[currentIndex]].Frames, movs["player"].SpriteSheet.Name)
+			movs["player"].SpriteSheet = lib.NewSpriteSheet(tx[movs["player"].SpriteSheet.Name], lib.SpriteSheets[txArray[currentSIndex]].Frames, movs["player"].SpriteSheet.Name)
 			currentMenu = MainMenu
 		}
+		// else if currentMenu == MusicSelector {
+		// 	lib.SetBackgroundMusic(a[aArray[currentAIndex]])
+		// }
 	}
 
 	return nil

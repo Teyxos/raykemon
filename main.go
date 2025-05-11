@@ -100,7 +100,7 @@ func main() {
 		} else if currentScreen == lib.BattleScreen {
 			screens.DrawBattleScreen()
 		} else if currentScreen == lib.MenuScreen {
-			screens.DrawMenuScreen(moveables, Textures)
+			screens.DrawMenuScreen(moveables, Textures, Audios)
 		}
 
 		switch rl.GetKeyPressed() {
