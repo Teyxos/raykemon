@@ -2,26 +2,30 @@ package lib
 
 import rl "github.com/gen2brain/raylib-go/raylib"
 
+var SpriteSheets = make(map[string]SpriteSheet)
+
 type SpriteSheet struct {
 	Width   int32
 	Height  int32
 	Frames  int32
 	Columns int32
 	Rows    int32
+	Name    string
 	Texture rl.Texture2D
 }
 
-func NewSpriteSheet(texture rl.Texture2D, frames int32) SpriteSheet {
-	columns := frames
-	rows := int32(texture.Height / (texture.Width / frames))
+func NewSpriteSheet(t rl.Texture2D, f int32, n string) SpriteSheet {
+	columns := f
+	rows := int32(t.Height / (t.Width / f))
 
 	return SpriteSheet{
-		Width:   texture.Width,
-		Height:  texture.Height,
-		Frames:  frames,
+		Width:   t.Width,
+		Height:  t.Height,
+		Frames:  f,
 		Columns: columns,
 		Rows:    rows,
-		Texture: texture,
+		Name:    n,
+		Texture: t,
 	}
 }
 func (s *SpriteSheet) GetFrame(frame int32) rl.Rectangle {

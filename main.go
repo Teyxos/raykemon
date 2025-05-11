@@ -37,8 +37,8 @@ func main() {
 
 	var monitor = rl.GetCurrentMonitor()
 
-	rl.SetTargetFPS(60) // This will be a settings option later
-	rl.SetExitKey(0)    // So user doesnt accidently close the window
+	rl.SetTargetFPS(0) // This will be a settings option later
+	rl.SetExitKey(0)   // So user doesnt accidently close the window
 
 	lib.SetScreen(lib.WorldScreen)
 
@@ -63,9 +63,20 @@ func main() {
 				return
 			}
 
-			moveables["player"] = lib.MoveableFromTexture(100, 100, 2.5, Textures[strings.Join([]string{"assets/textures/", words[1]}, "")], int32(frames))
+			width, _ := strconv.Atoi(words[3])
+			height, _ := strconv.Atoi(words[4])
+
+			moveables["player"] = lib.MoveableFromTexture(100, 100, int32(width), int32(height), 2.5, Textures[strings.Join([]string{"assets/textures/", words[1]}, "")], int32(frames), words[1])
+			lib.SpriteSheets[strings.Join([]string{"assets/textures/", words[1]}, "")] = lib.NewSpriteSheet(Textures[strings.Join([]string{"assets/textures/", words[1]}, "")], int32(frames), words[1])
 		case "BGMusic":
 			lib.SetBackgroundMusic(Audios[strings.Join([]string{"assets/audio/", words[1]}, "")])
+		case "SpriteSheet":
+			frames, err := strconv.Atoi(words[2])
+			if err != nil {
+				rl.TraceLog(rl.LogError, "Failed to convert string to int: %v", err)
+				return
+			}
+			lib.SpriteSheets[strings.Join([]string{"assets/textures/", words[1]}, "")] = lib.NewSpriteSheet(Textures[strings.Join([]string{"assets/textures/", words[1]}, "")], int32(frames), words[1])
 		}
 	}
 
@@ -82,32 +93,14 @@ func main() {
 
 		// Logic to draw the current screen
 		if currentScreen == lib.WorldScreen {
-
-			if rl.IsKeyDown(rl.KeyUp) {
-				moveables["player"].MoveUp(dt)
-				moveables["player"].Direction = lib.DirectionUp
-			}
-			if rl.IsKeyDown(rl.KeyDown) {
-				moveables["player"].MoveDown(dt)
-				moveables["player"].Direction = lib.DirectionDown
-			}
-			if rl.IsKeyDown(rl.KeyLeft) {
-				moveables["player"].MoveLeft(dt)
-				moveables["player"].Direction = lib.DirectionLeft
-			}
-			if rl.IsKeyDown(rl.KeyRight) {
-				moveables["player"].MoveRight(dt)
-				moveables["player"].Direction = lib.DirectionRight
-			}
-
-			screens.DrawWorldScreen()
+			screens.DrawWorldScreen(moveables, dt)
 
 			moveables["player"].DrawSelf()
 
 		} else if currentScreen == lib.BattleScreen {
 			screens.DrawBattleScreen()
 		} else if currentScreen == lib.MenuScreen {
-			screens.DrawMenuScreen()
+			screens.DrawMenuScreen(moveables, Textures)
 		}
 
 		switch rl.GetKeyPressed() {
@@ -115,7 +108,7 @@ func main() {
 			lib.SetScreen(lib.WorldScreen)
 		case rl.KeyF2:
 			lib.SetScreen(lib.BattleScreen)
-		case rl.KeyF3:
+		case rl.KeyM:
 			lib.SetScreen(lib.MenuScreen)
 		case rl.KeyF11:
 			// Test if this works on not wayland compositors
@@ -129,8 +122,13 @@ func main() {
 			rl.ToggleFullscreen()
 		}
 
-		rl.ClearBackground(rl.Black)
+		UI()
 
+		rl.ClearBackground(rl.Black)
 		rl.EndDrawing()
 	}
+}
+
+func UI() {
+	rl.DrawText("FPS: "+strconv.Itoa(int(rl.GetFPS())), 10, 10, 20, rl.Black)
 }

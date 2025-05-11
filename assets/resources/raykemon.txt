@@ -1,2 +1,2 @@
-Player character.png 3
+Player character.png 3 50 50
 BGMusic country.mp3
